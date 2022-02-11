@@ -3,7 +3,7 @@ from pyspark.sql.functions import struct
 from pyspark.sql.types import *
 from pyspark.sql import functions as f
 import networkx
-from networkx import Graph,draw
+from networkx import Graph
 
 
 def udf1(row):
