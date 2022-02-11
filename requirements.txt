@@ -1,0 +1,4 @@
+networkx
+py4j==0.10.9
+pyspark
+pytest
