@@ -40,7 +40,7 @@ df2 = df1.filter(f.col("TOTAL_Score") > 15)
 # print(df2.count())
 
 graph1 = Graph()
-pandas_df = df2.toPandas()
+pandas_df = df1.toPandas()
 orig = tuple(pandas_df['ORIG'])
 benef = tuple(pandas_df['BENEF'])
 graph1.add_edges_from(list(zip(orig, benef)))
@@ -51,5 +51,5 @@ for comp in networkx.connected_components(graph1):
     count += 1
 
 udf1 = f.udf(udf1, IntegerType())
-df2 = df2.withColumn("Group", udf1(struct(df2["ORIG"])))
+df2 = df1.withColumn("Group", udf1(struct(df1["ORIG"])))
 df2.show(25, truncate=False)
