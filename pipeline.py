@@ -1,9 +1,18 @@
-from pyspark.sql import SparkSession
-from pyspark.sql.functions import struct
-from pyspark.sql.types import *
-from pyspark.sql import functions as f
+import os
+import sys
+
 import networkx
 from networkx import Graph
+
+from pyspark.sql import SparkSession
+from pyspark.sql import functions as f
+from pyspark.sql.functions import struct
+from pyspark.sql.types import *
+from pyspark.sql.window import Window
+
+
+os.environ['PYSPARK_PYTHON'] = sys.executable
+os.environ['PYSPARK_DRIVER_PYTHON'] = sys.executable
 
 
 def udf1(row):
