@@ -64,7 +64,10 @@ udf1 = f.udf(udf1, IntegerType())
 df2 = df1.withColumn("Group", udf1(struct(df1["ORIG"])))
 
 w1 = Window.partitionBy("Group")
-df3 = df2.withColumn("ALERT_KEY", f.when((f.col("TOTAL_Score") == f.max("TOTAL_Score").over(w1)) |
-                                         (f.col("PAYMENT_DATE") >= f.min("PAYMENT_DATE").over(w1)), "ALERT_KEY_TRUE").
+w2 = Window.partitionBy("Group", "ALERT_KEY")
+df3 = df2.withColumn("ALERT_KEY", f.when((f.col("TOTAL_Score") == f.max("TOTAL_Score").over(w1)), "ALERT_KEY_TRUE").
+                     otherwise(None))
+df3 = df3.withColumn("ALERT_KEY", f.when((f.col("PAYMENT_DATE") == f.min("PAYMENT_DATE").over(w2)) &
+                                         (f.col("ALERT_KEY") == "ALERT_KEY_TRUE"), "ALERT_KEY_TRUE").
                      otherwise(None))
 df3.show(25, truncate=False)
