@@ -42,14 +42,14 @@ new_schema = StructType([
 ])
 
 spark = SparkSession.builder.appName("POC2").master("local").getOrCreate()
-df1 = spark.read.option("header", True).csv("dataset/data.csv", schema=new_schema)
+df1 = spark.read.option("header", True).csv("dataset/dataset.csv", schema=new_schema)
 # df1.show(truncate=False)
 
 df2 = df1.filter(f.col("TOTAL_Score") > 15)
 # print(df2.count())
 
 graph1 = Graph()
-pandas_df = df1.toPandas()
+pandas_df = df2.toPandas()
 orig = tuple(pandas_df['ORIG'])
 benef = tuple(pandas_df['BENEF'])
 graph1.add_edges_from(list(zip(orig, benef)))
@@ -58,7 +58,13 @@ count = 0
 for comp in networkx.connected_components(graph1):
     l1[count] = list(comp)
     count += 1
+    print(comp)
 
 udf1 = f.udf(udf1, IntegerType())
-df2 = df1.withColumn("Group", udf1(struct(df1["ORIG"])))
+df2 = df1.withColumn("Group", udf1(struct(df2["ORIG"])))
 df2.show(25, truncate=False)
+
+w1 = Window.partitionBy("Group").orderBy(f.desc("TOTAL_Score"))
+df3 = df2.withColumn("ALERT_KEY", f.when((f.col("TOTAL_Score").over(w1) == f.max("TOTAL_Score").over(w1)) &
+                                         (f.col("PAYMENT_DATE").over(w1) == f.min("PAYMENT_DATE").over(w1)), True))
+df3.show()
