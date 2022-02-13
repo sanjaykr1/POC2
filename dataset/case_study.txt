@@ -1,0 +1,30 @@
+case study  :
+
+- solution should be developed using OOPS and have 100% unit test coverage and error handling as required. Rerun without modification should always generate same value. Solution will run every month and corresponding data will be stored in partitioned by Month
+
+Input file (.csv) contains Feature values(FEATURE*) and Feature score values(FEATURE_SCORE* value from 1 to 5), originator and beneficiary
+TOTAL_Score = sum of all _Score*
+MONTH = YYYYMM format with the data of different month
+columns for input file as below : (REF_ID (unique_key) string, ORIG and BENEF string, PAYMENT_DATE = Timestamp, rest double,
+REF_ID, ORIG, BENEF, FEATURE1, FEATURE1_Score, FEATURE2, FEATURE2_Score, FEATURE3, FEATURE3_Score, FEATURE4, FEATURE4_Score, FEATURE5, FEATURE5_Score, TOTAL_Score, PAYMENT_DATE, MONTH
+
+As a operator, i would like to have the events generated on the feature data with following requirement :
+- only select TOTAL_Score above 15 (filter criteria)
+- group the records to generate a single event using connected components of ORIG and BENEF,
+- grouped alert will have a ALERT_KEY(originator) and top3 feature (ordered descending by score) this is corresponding to the highest Total Score and minimum payment_date
+
+
+output file format :
+REF_ID, ORIG, BENEF, top_feat1, top_feat1_value, top_feat1_score, top_feat2, top_feat2_value, top_feat2_score,top_feat3, top_feat3_value, top_feat3_score, TOTAL_Score, PAYMENT_DATE, MONTH, group, ALERT_KEY, alert_top_feat1, alert_top_feat1_value, alert_top_feat1_score, alert_top_feat2, alert_top_feat2_value, alert_top_feat2_score,alert_top_feat3, alert_top_feat3_value, alert_top_feat3_score
+
+values before group corressponds to the input record, columns from group onwards are related to the grouped alert
+
+connected components
+ref, orig, benef , group
+1, Jack, Harry, 0
+2, John, Jack, 0
+3, Harry, Tom, 0
+4, Tom, Jack, 0
+5, Bruce, Jackie,1
+
+As the orig, benef are connected to each other from ref 1 to 4 they are grouped together, ref 5 orig and benef are not involved so it is seperate
