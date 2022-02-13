@@ -10,7 +10,6 @@ from pyspark.sql.functions import struct
 from pyspark.sql.types import *
 from pyspark.sql.window import Window
 
-
 os.environ['PYSPARK_PYTHON'] = sys.executable
 os.environ['PYSPARK_DRIVER_PYTHON'] = sys.executable
 
@@ -49,7 +48,7 @@ df2 = df1.filter(f.col("TOTAL_Score") > 15)
 # print(df2.count())
 
 graph1 = Graph()
-pandas_df = df1.toPandas()
+pandas_df = df2.toPandas()
 orig = tuple(pandas_df['ORIG'])
 benef = tuple(pandas_df['BENEF'])
 graph1.add_edges_from(list(zip(orig, benef)))
@@ -61,13 +60,13 @@ for comp in networkx.connected_components(graph1):
     print(comp)
 
 udf1 = f.udf(udf1, IntegerType())
-df2 = df1.withColumn("Group", udf1(struct(df1["ORIG"])))
+df2 = df2.withColumn("Group", udf1(struct(df2["ORIG"])))
 
 w1 = Window.partitionBy("Group")
 w2 = Window.partitionBy("Group", "ALERT_KEY")
-df3 = df2.withColumn("ALERT_KEY", f.when((f.col("TOTAL_Score") == f.max("TOTAL_Score").over(w1)), "ALERT_KEY_TRUE").
+df3 = df2.withColumn("ALERT_KEY", f.when((f.col("TOTAL_Score") == f.max("TOTAL_Score").over(w1)), True).
                      otherwise(None))
 df3 = df3.withColumn("ALERT_KEY", f.when((f.col("PAYMENT_DATE") == f.min("PAYMENT_DATE").over(w2)) &
-                                         (f.col("ALERT_KEY") == "ALERT_KEY_TRUE"), "ALERT_KEY_TRUE").
+                                         (f.col("ALERT_KEY") == True), True).
                      otherwise(None))
 df3.show(25, truncate=False)
