@@ -12,6 +12,11 @@ class Account(Utility):
     """
 
     def __init__(self, filename, schema):
+        """
+        initialize Account object with custom schema and specific filename
+        :param filename: dataset file
+        :param schema: custom schema
+        """
         super().__init__()
         # super().spark.sql("set spark.sql.legacy.timeParserPolicy=LEGACY")
         self.filename = filename
@@ -22,6 +27,10 @@ class Account(Utility):
         self.df.show()
 
     def add_group(self):
+        """
+        method to implement grouping according to connected components
+        :return:
+        """
         self.df = self.df.filter(f.col("TOTAL_Score") > 15)
         graph1 = Graph()
         pandas_df = self.df.toPandas()
@@ -34,8 +43,13 @@ class Account(Utility):
         pandas_df['Group'] = pandas_df['ORIG'].map(x)
         self.df = self.spark.createDataFrame(pandas_df)
         self.df.show()
+        self.writefile(self.df, "grouped_data")
 
     def add_alert_key(self):
+        """
+        Method to implement Alert Key column
+        :return:
+        """
         w1 = Window.partitionBy("Group")
         w2 = Window.partitionBy("Group", "ALERT_KEY")
         self.df = self.df.withColumn("ALERT_KEY", f.when((f.col("TOTAL_Score") == f.max("TOTAL_Score").over(w1)),
