@@ -38,10 +38,10 @@ class Account(Utility):
     def add_alert_key(self):
         w1 = Window.partitionBy("Group")
         w2 = Window.partitionBy("Group", "ALERT_KEY")
-        self.df = self.df.withColumn("ALERT_KEY", f.when((f.col("TOTAL_Score") == f.max("TOTAL_Score").over(w1)), True).
-                                     otherwise(None))
+        self.df = self.df.withColumn("ALERT_KEY", f.when((f.col("TOTAL_Score") == f.max("TOTAL_Score").over(w1)),
+                                                         True).otherwise(None))
         self.df = self.df.withColumn("ALERT_KEY", f.when((f.col("PAYMENT_DATE") == f.min("PAYMENT_DATE").over(w2)) &
-                                                         (f.col("ALERT_KEY") == True), True).
+                                                         (f.col("ALERT_KEY") == True), self.df["ORIG"]).
                                      otherwise(None))
-        self.df = self.df.orderBy("REF_ID")
-        self.df.show()
+        self.df = self.df.orderBy("Group")
+        self.df.show(25)

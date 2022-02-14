@@ -74,10 +74,14 @@ w2 = Window.partitionBy("Group", "ALERT_KEY")
 df3 = df2.withColumn("ALERT_KEY", f.when((f.col("TOTAL_Score") == f.max("TOTAL_Score").over(w1)), True).
                      otherwise(None))
 df3 = df3.withColumn("ALERT_KEY", f.when((f.col("PAYMENT_DATE") == f.min("PAYMENT_DATE").over(w2)) &
-                                         (f.col("ALERT_KEY") == True), True).
+                                         (f.col("ALERT_KEY") == True), df2["ORIG"]).
                      otherwise(None))
-# df3.show(25, truncate=False)
 df3 = df3.orderBy("Group")
+# df3.select("ORIG", "Group", "TOTAL_Score", "ALERT_KEY").show(25)
+df3.show()
+dfx = df3.withColumn("ALERT_KEY", f.last("ALERT_KEY", True).over(w1))
+dfx = dfx.orderBy("Group")
+dfx.show()
 cols = ["FEATURE1_Score", "FEATURE2_Score", "FEATURE3_Score", "FEATURE4_Score", "FEATURE5_Score"]
 df4 = df3. \
     withColumn("Top_feat1_score", sort_array(array([f.col(x) for x in cols]), asc=False)[0]). \
@@ -93,14 +97,14 @@ for items in df_dict:
     dicts = dict(zip(values[::2], values[1::2]))
     # print(new_dict)
     new_dict.append(dicts)
-print(new_dict)
+# print(new_dict)
 
 # df4.printSchema()
-df5 = df4.withColumn("Top_feat1", f.when(df4["Top_feat1_score"] == [x for y in new_dict for x in y.values()])).\
+"""df5 = df4.withColumn("Top_feat1", f.when(df4["Top_feat1_score"] == [x for y in new_dict for x in y.values()])).\
     withColumn("Top_feat2", f.when(df4["Top_feat2_score"] == [x for y in new_dict for x in y.values()])). \
     withColumn("Top_feat3", f.when(df4["Top_feat3_score"] == [x for y in new_dict for x in y.values()]))
 df5.show()
-
+"""
 # dict2 = df3.select(df3[3], df3[4]).rdd.collectAsMap()
 # print(dict2)
 
