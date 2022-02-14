@@ -99,6 +99,10 @@ for items in df_dict:
     new_dict.append(dicts)
 # print(new_dict)
 
+df2.write.partitionBy("MONTH").mode("overwrite"). \
+    option("header", True). \
+    option("inferSchema", True). \
+    csv("writing_data")
 # df4.printSchema()
 """df5 = df4.withColumn("Top_feat1", f.when(df4["Top_feat1_score"] == [x for y in new_dict for x in y.values()])).\
     withColumn("Top_feat2", f.when(df4["Top_feat2_score"] == [x for y in new_dict for x in y.values()])). \

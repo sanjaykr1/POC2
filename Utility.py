@@ -47,7 +47,7 @@ class Utility:
         """
         logger.info("Writing dataframe to file %s", filename)
         try:
-            df.write.mode("overwrite"). \
+            df.write.partitionBy("MONTH").mode("overwrite"). \
                 option("header", True). \
                 option("inferSchema", True). \
                 csv(filename)

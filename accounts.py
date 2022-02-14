@@ -3,7 +3,6 @@ from networkx import Graph
 
 from Utility import Utility
 from pyspark.sql import functions as f, Window
-from pyspark.sql.types import IntegerType
 
 
 class Account(Utility):
