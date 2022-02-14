@@ -6,7 +6,7 @@ from networkx import Graph
 
 from pyspark.sql import SparkSession
 from pyspark.sql import functions as f
-from pyspark.sql.functions import struct
+from pyspark.sql.functions import struct, sort_array, array
 from pyspark.sql.types import *
 from pyspark.sql.window import Window
 
@@ -70,3 +70,10 @@ df3 = df3.withColumn("ALERT_KEY", f.when((f.col("PAYMENT_DATE") == f.min("PAYMEN
                                          (f.col("ALERT_KEY") == True), True).
                      otherwise(None))
 df3.show(25, truncate=False)
+cols = ["FEATURE1_Score", "FEATURE2_Score", "FEATURE3_Score", "FEATURE4_Score", "FEATURE5_Score"]
+df4 = df3. \
+    withColumn("Top_feat1", sort_array(array([f.col(x) for x in cols]), asc=False)[0]). \
+    withColumn("Top_feat2", sort_array(array([f.col(x) for x in cols]), asc=False)[1]). \
+    withColumn("Top_feat3", sort_array(array([f.col(x) for x in cols]), asc=False)[2])
+df4.show()
+
