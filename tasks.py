@@ -60,11 +60,11 @@ for comp in networkx.connected_components(graph1):
 l2 = list(networkx.connected_components(graph1))
 dict1 = [dict.fromkeys(a, b) for b, a in enumerate(l2)]
 x = {k: v for x in dict1 for k, v in x.items()}
-print(x)
+# print(x)
 
 pandas_df['Group'] = pandas_df['ORIG'].map(x)
 df2 = spark.createDataFrame(pandas_df)
-df2.show()
+# df2.show()
 udf1 = f.udf(udf1, IntegerType())
 
 df2 = df2.withColumn("Group", udf1(struct(df2["ORIG"])))
@@ -76,12 +76,31 @@ df3 = df2.withColumn("ALERT_KEY", f.when((f.col("TOTAL_Score") == f.max("TOTAL_S
 df3 = df3.withColumn("ALERT_KEY", f.when((f.col("PAYMENT_DATE") == f.min("PAYMENT_DATE").over(w2)) &
                                          (f.col("ALERT_KEY") == True), True).
                      otherwise(None))
-df3.show(25, truncate=False)
+# df3.show(25, truncate=False)
+df3 = df3.orderBy("Group")
 cols = ["FEATURE1_Score", "FEATURE2_Score", "FEATURE3_Score", "FEATURE4_Score", "FEATURE5_Score"]
 df4 = df3. \
-    withColumn("Top_feat1_score", sort_array(array([f.col(x) for x in cols]), asc=False)[0]).\
-    withColumn("T").\
+    withColumn("Top_feat1_score", sort_array(array([f.col(x) for x in cols]), asc=False)[0]). \
     withColumn("Top_feat2_score", sort_array(array([f.col(x) for x in cols]), asc=False)[1]). \
     withColumn("Top_feat3_score", sort_array(array([f.col(x) for x in cols]), asc=False)[2])
-df4.show()
+# df4.show()
+
+df_dict = [row.asDict() for row in df3.collect()]
+new_dict = []
+for items in df_dict:
+    values_list = list(items.values())
+    values = values_list[3:-5]
+    dicts = dict(zip(values[::2], values[1::2]))
+    # print(new_dict)
+    new_dict.append(dicts)
+print(new_dict)
+
+# df4.printSchema()
+df5 = df4.withColumn("Top_feat1", f.when(df4["Top_feat1_score"] == [x for y in new_dict for x in y.values()])).\
+    withColumn("Top_feat2", f.when(df4["Top_feat2_score"] == [x for y in new_dict for x in y.values()])). \
+    withColumn("Top_feat3", f.when(df4["Top_feat3_score"] == [x for y in new_dict for x in y.values()]))
+df5.show()
+
+# dict2 = df3.select(df3[3], df3[4]).rdd.collectAsMap()
+# print(dict2)
 
