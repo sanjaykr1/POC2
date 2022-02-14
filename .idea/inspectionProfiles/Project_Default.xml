@@ -17,5 +17,14 @@
         </list>
       </option>
     </inspection_tool>
+    <inspection_tool class="PyUnresolvedReferencesInspection" enabled="true" level="WARNING" enabled_by_default="true">
+      <option name="ignoredIdentifiers">
+        <list>
+          <option value="pyspark.sql.functions.col" />
+          <option value="pyspark.sql.functions.max" />
+          <option value="pyspark.sql.functions.min" />
+        </list>
+      </option>
+    </inspection_tool>
   </profile>
 </component>

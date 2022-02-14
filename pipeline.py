@@ -1,79 +1,26 @@
-import os
-import sys
+import configparser
 
-import networkx
-from networkx import Graph
-
-from pyspark.sql import SparkSession
-from pyspark.sql import functions as f
-from pyspark.sql.functions import struct, sort_array, array
-from pyspark.sql.types import *
-from pyspark.sql.window import Window
-
-os.environ['PYSPARK_PYTHON'] = sys.executable
-os.environ['PYSPARK_DRIVER_PYTHON'] = sys.executable
+from accounts import Account
 
 
-def udf1(row):
-    for k, v in l1.items():
-        if row['ORIG'] in v:
-            # print(k)
-            return k
+class Pipeline(Account):
+    """
+    class for running pipeline tasks
+    """
+
+    def __init__(self, filename, schema):
+        self.acc = Account(filename, schema)
+
+    def account_methods(self):
+        self.acc.add_group()
+        self.acc.add_alert_key()
 
 
-new_schema = StructType([
-    StructField("REF_ID", StringType(), True),
-    StructField("ORIG", StringType(), True),
-    StructField("BENEF", StringType(), True),
-    StructField("FEATURE1", StringType(), True),
-    StructField("FEATURE1_Score", DoubleType(), True),
-    StructField("FEATURE2", StringType(), True),
-    StructField("FEATURE2_Score", DoubleType(), True),
-    StructField("FEATURE3", StringType(), True),
-    StructField("FEATURE3_Score", DoubleType(), True),
-    StructField("FEATURE4", StringType(), True),
-    StructField("FEATURE4_Score", DoubleType(), True),
-    StructField("FEATURE5", StringType(), True),
-    StructField("FEATURE5_Score", DoubleType(), True),
-    StructField("TOTAL_Score", DoubleType(), True),
-    StructField("PAYMENT_DATE", TimestampType(), True),
-    StructField("MONTH", StringType(), True),
-])
-
-spark = SparkSession.builder.appName("POC2").master("local").getOrCreate()
-df1 = spark.read.option("header", True).csv("dataset/data.csv", schema=new_schema)
-# df1.show(truncate=False)
-
-df2 = df1.filter(f.col("TOTAL_Score") > 15)
-# print(df2.count())
-
-graph1 = Graph()
-pandas_df = df2.toPandas()
-orig = tuple(pandas_df['ORIG'])
-benef = tuple(pandas_df['BENEF'])
-graph1.add_edges_from(list(zip(orig, benef)))
-l1 = {}
-count = 1
-for comp in networkx.connected_components(graph1):
-    l1[count] = list(comp)
-    count += 1
-    print(comp)
-
-udf1 = f.udf(udf1, IntegerType())
-df2 = df2.withColumn("Group", udf1(struct(df2["ORIG"])))
-
-w1 = Window.partitionBy("Group")
-w2 = Window.partitionBy("Group", "ALERT_KEY")
-df3 = df2.withColumn("ALERT_KEY", f.when((f.col("TOTAL_Score") == f.max("TOTAL_Score").over(w1)), True).
-                     otherwise(None))
-df3 = df3.withColumn("ALERT_KEY", f.when((f.col("PAYMENT_DATE") == f.min("PAYMENT_DATE").over(w2)) &
-                                         (f.col("ALERT_KEY") == True), True).
-                     otherwise(None))
-df3.show(25, truncate=False)
-cols = ["FEATURE1_Score", "FEATURE2_Score", "FEATURE3_Score", "FEATURE4_Score", "FEATURE5_Score"]
-df4 = df3. \
-    withColumn("Top_feat1", sort_array(array([f.col(x) for x in cols]), asc=False)[0]). \
-    withColumn("Top_feat2", sort_array(array([f.col(x) for x in cols]), asc=False)[1]). \
-    withColumn("Top_feat3", sort_array(array([f.col(x) for x in cols]), asc=False)[2])
-df4.show()
-
+cfg_parser = configparser.ConfigParser()
+filepath = "config.cfg"
+cfg_parser.read(filepath)
+file = cfg_parser.get('path', 'dataset')
+print(type(file))
+sch = cfg_parser.get('schema', 'custom_schema')
+p1 = Pipeline(file, sch)
+p1.account_methods()
