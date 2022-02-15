@@ -11,11 +11,15 @@ REF_ID, ORIG, BENEF, FEATURE1, FEATURE1_Score, FEATURE2, FEATURE2_Score, FEATURE
 As a operator, i would like to have the events generated on the feature data with following requirement :
 - only select TOTAL_Score above 15 (filter criteria)
 - group the records to generate a single event using connected components of ORIG and BENEF,
-- grouped alert will have a ALERT_KEY(originator) and top3 feature (ordered descending by score) this is corresponding to the highest Total Score and minimum payment_date
+- grouped alert will have a ALERT_KEY(originator) and top3 feature (ordered descending by score) this is corresponding
+to the highest Total Score and minimum payment_date
 
 
 output file format :
-REF_ID, ORIG, BENEF, top_feat1, top_feat1_value, top_feat1_score, top_feat2, top_feat2_value, top_feat2_score,top_feat3, top_feat3_value, top_feat3_score, TOTAL_Score, PAYMENT_DATE, MONTH, group, ALERT_KEY, alert_top_feat1, alert_top_feat1_value, alert_top_feat1_score, alert_top_feat2, alert_top_feat2_value, alert_top_feat2_score,alert_top_feat3, alert_top_feat3_value, alert_top_feat3_score
+REF_ID, ORIG, BENEF, top_feat1, top_feat1_value, top_feat1_score, top_feat2, top_feat2_value, top_feat2_score,top_feat3,
+top_feat3_value, top_feat3_score, TOTAL_Score, PAYMENT_DATE, MONTH, group, ALERT_KEY, alert_top_feat1,
+alert_top_feat1_value, alert_top_feat1_score, alert_top_feat2, alert_top_feat2_value, alert_top_feat2_score,
+alert_top_feat3, alert_top_feat3_value, alert_top_feat3_score
 
 values before group corresponds to the input record, columns from group onwards are related to the grouped alert
 

@@ -49,12 +49,7 @@ class Account(Utility):
         Method to implement Alert Key column
         :return:
         """
-        w1 = Window.partitionBy("Group")
-        w2 = Window.partitionBy("Group", "ALERT_KEY")
-        self.df = self.df.withColumn("ALERT_KEY", f.when((f.col("TOTAL_Score") == f.max("TOTAL_Score").over(w1)),
-                                                         True).otherwise(None))
-        self.df = self.df.withColumn("ALERT_KEY", f.when((f.col("PAYMENT_DATE") == f.min("PAYMENT_DATE").over(w2)) &
-                                                         (f.col("ALERT_KEY") == True), self.df["ORIG"]).
-                                     otherwise(None))
+        w1 = Window.partitionBy("Group").orderBy(f.desc("TOTAL_Score"), "PAYMENT_DATE")
+        self.df = self.df.withColumn("ALERT_KEY", f.first(self.df["ORIG"]).over(w1))
         self.df = self.df.orderBy("Group")
         self.df.show(25)

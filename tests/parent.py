@@ -9,7 +9,7 @@ class PySparkTest(unittest.TestCase):
 
     cfg_parser = configparser.ConfigParser()
     spark = SparkSession.builder.master('local').appName('testing').getOrCreate()
-    filepath = "C:\\Users\\ACER NITRO 5\\IdeaProjects\\POC2\\config.cfg"
+    filepath = "C:\\Users\\B00827\\IdeaProjects\\POC2\\config.cfg"
     cfg_parser.read(filepath)
     sch = cfg_parser.get('schema', 'custom_schema')
 
