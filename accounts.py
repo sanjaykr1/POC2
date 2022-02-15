@@ -88,6 +88,7 @@ class Account(Utility):
             df1.Feat2[1].cast(DoubleType()).alias("Top_feat2_score"),
             df1.Feat3[0].alias("Top_feat3"),
             df1.Feat3[1].cast(DoubleType()).alias("Top_feat3_score"))
+
         w = Window().orderBy(f.lit('row_no'))
         self.df = self.df.withColumn("row", f.row_number().over(w))
         df1 = df1.withColumn("row", f.row_number().over(w))
