@@ -22,8 +22,6 @@ class Account(Utility):
         self.filename = filename
         self.schema = schema
         self.df = super().readfile(self.filename, self.schema)
-        self.l1 = {}
-        self.count = 1
         self.df.show()
 
     def add_group(self):
@@ -55,6 +53,7 @@ class Account(Utility):
         self.df = self.df.withColumn("ALERT_KEY", f.last("ALERT_KEY", True).over(w1))
         self.df = self.df.orderBy("Group", "REF_ID")
         self.df.show(25)
+        self.writefile(self.df, "alert_key_data")
 
     def add_top_features(self):
         """
@@ -107,8 +106,9 @@ class Account(Utility):
                      "FEATURE4", "FEATURE4_Score", "FEATURE5", "FEATURE5_Score"]
         self.df = self.df.drop(*drop_cols)
         select_cols = ["REF_ID", "ORIG", "BENEF", "Top_feat1", "Top_feat1_score", "Top_feat2", "Top_feat2_score",
-                       "Top_feat3", "Top_feat3_score", "TOTAL_Score", "PAYMENT_DATE", "MONTH", "group", "ALERT_KEY",
+                       "Top_feat3", "Top_feat3_score", "TOTAL_Score", "PAYMENT_DATE", "MONTH", "Group", "ALERT_KEY",
                        "Alert_top_feat1", "Alert_top_feat1_score", "Alert_top_feat2",
                        "Alert_top_feat2_score", "Alert_top_feat3", "Alert_top_feat3_score"]
         self.df = self.df.select(*select_cols)
         self.df.show()
+        self.writefile(self.df, "top_features")

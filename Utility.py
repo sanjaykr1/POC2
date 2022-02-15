@@ -61,6 +61,7 @@ class Utility:
         :param schema: custom schema string
         :return:
         """
+        logger.info("Converting custom schema from config file to schema")
         val_types = {
             "StringType()": StringType(),
             "DoubleType()": DoubleType(),
