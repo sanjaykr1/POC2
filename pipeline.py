@@ -9,6 +9,11 @@ class Pipeline(Account):
     """
 
     def __init__(self, filename, schema):
+        """
+        Creating account class object
+        :param filename: dataset filename to be read
+        :param schema: custom schema for the dataset
+        """
         self.acc = Account(filename, schema)
 
     def account_methods(self):
@@ -18,6 +23,7 @@ class Pipeline(Account):
         """
         self.acc.add_group()
         self.acc.add_alert_key()
+        self.acc.add_top_features()
 
 
 cfg_parser = configparser.ConfigParser()
