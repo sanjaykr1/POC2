@@ -40,6 +40,7 @@ class Account(Utility):
         x = {k: v for x in dict1 for k, v in x.items()}
         pandas_df['Group'] = pandas_df['ORIG'].map(x)
         self.df = self.spark.createDataFrame(pandas_df)
+        self.df = self.df.orderBy("Group", "REF_ID")
         self.df.show()
         self.writefile(self.df, "grouped_data")
 
@@ -52,7 +53,7 @@ class Account(Utility):
         self.df = self.df.withColumn("ALERT_KEY", f.first(self.df["ORIG"]).over(w1))
         self.df = self.df.withColumn("ALERT_KEY", f.last("ALERT_KEY", True).over(w1))
         self.df = self.df.orderBy("Group", "REF_ID")
-        self.df.show(25)
+        # self.df.show(25)
         self.writefile(self.df, "alert_key_data")
 
     def add_top_features(self):
@@ -71,6 +72,11 @@ class Account(Utility):
             x = dict(zip(values_list[::2], values_list[1::2]))
             dicts = dict(sorted(x.items(), reverse=True, key=lambda item: item[1]))
             new_dict.append([ele for ele in list(dicts.items())[:3]])
+        """
+        The above code snipped generates a list of lists having top 3 as follows
+        [[('Credit', 5.0), ('Transfer', 4.0), ('HighRisk', 3.0)], [('HighRisk', 5.0), ('Cash', 5.0), ('Credit', 5.0)]..
+        (Feature name, feature score)
+        """
         """
         Extracting top 3 features
         """
@@ -110,5 +116,6 @@ class Account(Utility):
                        "Alert_top_feat1", "Alert_top_feat1_score", "Alert_top_feat2",
                        "Alert_top_feat2_score", "Alert_top_feat3", "Alert_top_feat3_score"]
         self.df = self.df.select(*select_cols)
+        self.df = self.df.orderBy("Group", "REF_ID")
         self.df.show()
         self.writefile(self.df, "top_features")

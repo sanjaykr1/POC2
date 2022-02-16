@@ -1,0 +1,7 @@
+REF_ID,ORIG,BENEF,Top_feat1,Top_feat1_score,Top_feat2,Top_feat2_score,Top_feat3,Top_feat3_score,TOTAL_Score,PAYMENT_DATE,Group,ALERT_KEY,Alert_top_feat1,Alert_top_feat1_score,Alert_top_feat2,Alert_top_feat2_score,Alert_top_feat3,Alert_top_feat3_score,MONTH
+2,Sanjay,Prakash,Deposit,5.0,Cash,5.0,Credit,4.0,18.0,2016-11-01 17:01:00.948878,0,Sanjay,Deposit,5.0,Cash,5.0,Credit,4.0,201611
+4,Suman,Shivam,Credit,5.0,Cash,4.0,HighRisk,4.0,18.0,2017-02-14 11:23:22.299687,1,Suman,Credit,5.0,Cash,4.0,HighRisk,4.0,201702
+5,Robert,Edward,Transfer,5.0,Cash,4.0,HighRisk,4.0,19.0,2017-06-10 11:31:27.948881,2,Alphonse,HighRisk,5.0,Credit,4.0,Cash,4.0,201706
+6,Daniel,Robert,Credit,5.0,Deposit,5.0,HighRisk,3.0,16.0,2017-06-10 11:30:27.999999,2,Alphonse,HighRisk,5.0,Credit,4.0,Cash,4.0,201706
+7,Alphonse,Daniel,HighRisk,5.0,Credit,4.0,Cash,4.0,19.0,2017-06-10 11:30:27.000000,2,Alphonse,HighRisk,5.0,Credit,4.0,Cash,4.0,201706
+9,Anshuman,Prateek,HighRisk,5.0,Cash,5.0,Credit,5.0,20.0,2017-01-10 11:31:27.948885,3,Anshuman,HighRisk,5.0,Cash,5.0,Credit,5.0,201901

@@ -4,7 +4,7 @@ import networkx
 from networkx import Graph
 from pyspark.sql import SparkSession
 from pyspark.sql import functions as f
-from pyspark.sql.functions import struct
+from pyspark.sql.functions import struct, desc
 from pyspark.sql.types import StringType, DoubleType, TimestampType, StructType, StructField, IntegerType, ArrayType
 from pyspark.sql.window import Window
 
