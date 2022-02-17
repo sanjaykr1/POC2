@@ -51,6 +51,7 @@ class AccountTest(PySparkTest):
         # cls.df.show(truncate=False)
 
     def test_add_group(self):
+        self.logger.info("Testing add_group() method")
         self.a1.add_group()
         test_group_path = self.cfg_parser.get('path', 'test_group_data')
         group_schema = StructType([
@@ -72,6 +73,7 @@ class AccountTest(PySparkTest):
             StructField("Group", LongType(), True),
             StructField("MONTH", StringType(), True),
         ])
+        self.logger.info("Reading test_csv file %s", test_group_path)
         test_group_df = self.spark.read.csv(test_group_path, header=True, schema=group_schema)
         cols = self.a1.df.columns[:]
         test_group_df = test_group_df.select(*cols)
@@ -80,6 +82,7 @@ class AccountTest(PySparkTest):
         self.dataframe_equal(self.a1.df, test_group_df, "REF_ID")
 
     def test_alert_key(self):
+        self.logger.info("Testing add_alert_key() method")
         self.a1.add_alert_key()
         test_alert_data = self.cfg_parser.get('path', 'test_alert_data')
         alert_schema = StructType([
@@ -102,14 +105,16 @@ class AccountTest(PySparkTest):
             StructField("ALERT_KEY", StringType(), True),
             StructField("MONTH", StringType(), True)
         ])
+        self.logger.info("Read test_csv file %s", test_alert_data)
         test_alert_df = self.spark.read.csv(test_alert_data, header=True, schema=alert_schema)
         cols = self.a1.df.columns[:]
         test_alert_df = test_alert_df.select(*cols)
-        self.a1.df.printSchema()
-        test_alert_df.printSchema()
+        # self.a1.df.printSchema()
+        # test_alert_df.printSchema()
         self.dataframe_equal(self.a1.df, test_alert_df, "REF_ID")
 
     def test_top_3_features(self):
+        self.logger.info("Testing add_top_features() method")
         self.a1.add_top_features()
         test_top3 = self.cfg_parser.get('path', 'test_top_feat_data')
         top3_schema = StructType([
@@ -134,10 +139,11 @@ class AccountTest(PySparkTest):
             StructField("Alert_top_feat3_score", DoubleType(), True),
             StructField("MONTH", StringType(), True)
         ])
+        self.logger.info("Reading test_csv file %s", test_top3)
         test_top3_df = self.spark.read.csv(test_top3, header=True, schema=top3_schema)
         cols = self.a1.df.columns[:]
         test_top3_df = test_top3_df.select(*cols)
 
-        self.a1.df.printSchema()
-        test_top3_df.printSchema()
+        # self.a1.df.printSchema()
+        # test_top3_df.printSchema()
         self.dataframe_equal(self.a1.df, test_top3_df, "REF_ID")

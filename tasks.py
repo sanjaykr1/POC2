@@ -15,9 +15,7 @@ os.environ['PYSPARK_DRIVER_PYTHON'] = sys.executable
 def udf1(row):
     for k, v in l1.items():
         if row['ORIG'] in v:
-            # print(k)
             return k
-
 
 new_schema = StructType([
     StructField("REF_ID", StringType(), True),
@@ -55,21 +53,27 @@ count = 1
 for comp in networkx.connected_components(graph1):
     l1[count] = list(comp)
     count += 1
+print(l1)
+
+
 l2 = list(networkx.connected_components(graph1))
 dict1 = [dict.fromkeys(a, b) for b, a in enumerate(l2)]
 x = {k: v for x in dict1 for k, v in x.items()}
-# print(x)
+print(x)
 
 pandas_df['Group'] = pandas_df['ORIG'].map(x)
 df2 = spark.createDataFrame(pandas_df)
 # df2.show()
 udf1 = f.udf(udf1, IntegerType())
 
-df2 = df2.withColumn("Group", udf1(struct(df2["ORIG"])))
+dfy = df2.withColumn("Group", udf1(struct(df2["ORIG"])))
+dfy.show()
+
 # df2 = df2.withColumn("Group", [k for k, v in l1 if v == df2["ORIG"]])
 w1 = Window.partitionBy("Group")
 w3 = Window.partitionBy("Group").orderBy(desc("TOTAL_Score"), "PAYMENT_DATE")
 df3 = df2.withColumn("ALERT_KEY", f.first(df2["ORIG"]).over(w3))
+
 """
 w2 = Window.partitionBy("Group", "ALERT_KEY")
 df3 = df2.withColumn("ALERT_KEY", f.when((f.col("TOTAL_Score") == f.max("TOTAL_Score").over(w1)), True).
@@ -83,7 +87,7 @@ df3 = df3.withColumn("ALERT_KEY", f.when((f.col("PAYMENT_DATE") == f.min("PAYMEN
 df3 = df3.withColumn("ALERT_KEY", f.last("ALERT_KEY", True).over(w3))
 # df3 = df3.orderBy(desc("TOTAL_Score"), "Group")
 df3 = df3.orderBy("Group", "REF_ID")
-df3.show()
+# df3.show()
 # dfx.show()
 # cols = ["FEATURE1_Score", "FEATURE2_Score", "FEATURE3_Score", "FEATURE4_Score", "FEATURE5_Score"]
 """
@@ -115,7 +119,7 @@ for a in new_dict:
 print(top3_1)
 """
 cols_list = df3.rdd.map(lambda x: x[0]).collect()
-# print(cols_list)
+print(cols_list)
 """
 cols_dict = dict(zip(cols_list, top3_1))
 
@@ -135,8 +139,8 @@ xyz.printSchema()
 xyz.show()
 """
 df5 = spark.createDataFrame(new_dict, schema=schema)
-df5.printSchema()
-df5.show()
+# df5.printSchema()
+# df5.show()
 # temp_df = spark.createDataFrame(top3)
 # temp_df = temp_df.withColumn("REF_ID", xyz["REF_ID"])
 df5 = df5.select(
@@ -146,12 +150,26 @@ df5 = df5.select(
     df5.Feat2[1].cast(DoubleType()).alias("Top_feat2_score"),
     df5.Feat3[0].alias("Top_feat3"),
     df5.Feat3[1].cast(DoubleType()).alias("Top_feat3_score"))
-df5.show()
+# df5.show()
 w = Window().orderBy(f.lit('A'))
-df3 = df3.withColumn("row", f.row_number().over(w))
+
+
+def add_labels(i):
+    return cols_list[i-1]
+    # since row num begins from 1
+
+
+labels_udf = f.udf(add_labels, StringType())
+
+# df3 = df3.withColumn("row", f.row_number().over(w))
 df5 = df5.withColumn("row", f.row_number().over(w))
-df3 = df3.join(df5, ["row"])
+new_df = df5.withColumn('REF_ID', labels_udf('row'))
+new_df = new_df.drop("row")
+new_df.show()
+
+df3 = df3.join(new_df, ["REF_ID"])
 df3 = df3.drop("row")
+df3 = df3.orderBy("Group", "REF_ID")
 df3.show()
 
 df4 = df3.withColumn("Alert_top_feat1", f.first(df3["Top_feat1"]).over(w3)). \
@@ -170,5 +188,6 @@ select_cols = ["REF_ID", "ORIG", "BENEF", "Top_feat1", "Top_feat1_score", "Top_f
                "Alert_top_feat1", "Alert_top_feat1_score", "Alert_top_feat2",
                "Alert_top_feat2_score", "Alert_top_feat3", "Alert_top_feat3_score"]
 df5 = df5.select(*select_cols)
-# df5.printSchema()
+df5.printSchema()
+df5 = df5.orderBy("Group","REF_ID")
 df5.show()

@@ -12,6 +12,7 @@ class PySparkTest(unittest.TestCase):
     filepath = "C:\\Users\\B00827\\IdeaProjects\\POC2\\config.cfg"
     cfg_parser.read(filepath)
     sch = cfg_parser.get('schema', 'custom_schema')
+    logger = logging.getLogger(__name__)
 
     @classmethod
     def create_testing_pyspark_session(cls):
@@ -22,8 +23,8 @@ class PySparkTest(unittest.TestCase):
 
     @classmethod
     def logger_initializer(cls):
-        logger = logging.getLogger(__name__)
-        logger.setLevel(logging.INFO)
+        cls.logger = logging.getLogger(__name__)
+        cls.logger.setLevel(logging.INFO)
 
     @classmethod
     def setUpClass(cls):

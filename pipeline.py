@@ -14,6 +14,7 @@ class Pipeline(Account):
         :param filename: dataset filename to be read
         :param schema: custom schema for the dataset
         """
+        # super().logger.info("Creating account object in pipeline class")
         self.acc = Account(filename, schema)
 
     def account_methods(self):
