@@ -23,8 +23,11 @@ class Pipeline(Account):
         :return:
         """
         self.acc.add_group()
+        self.acc.writefile(self.acc.df, "grouped_data")
         self.acc.add_alert_key()
+        self.acc.writefile(self.acc.df, "alert_key_data")
         self.acc.add_top_features()
+        self.acc.writefile(self.acc.df, "top_features")
 
 
 cfg_parser = configparser.ConfigParser()

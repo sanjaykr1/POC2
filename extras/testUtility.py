@@ -16,7 +16,7 @@ class MyTestClass(PySparkTest):
         cls.u1 = Utility()
 
     def test_readfile(self):
-        filename = "dataset/testAccountdata.csv"
+        filename = "../tests/dataset/testAccountdata.csv"
         schema = super().sch
         df = self.u1.readfile(filename, schema)
         self.assertTrue(df.head())
@@ -28,7 +28,7 @@ class MyTestClass(PySparkTest):
                 ("3", "Val3", "201703")]
         test_df = super().spark.createDataFrame(data, cols)
         self.u1.writefile(test_df, "test_utility_write_data")
-        self.assertTrue(os.path.isdir("C:\\Users\\B00827\\IdeaProjects\\POC2\\tests\\test_utility_write_data"))
+        self.assertTrue(os.path.isdir("/tests/test_utility_write_data"))
 
     def test_custom_schema(self):
         new_schema = StructType([

@@ -1,6 +1,7 @@
 networkx~=2.2
 py4j==0.10.9
 pyspark~=3.2.1
-pytest
+pytest==4.6
 coverage
 pandas~=0.24.2
+pytest-cov

@@ -1,5 +1,4 @@
-import networkx
-from networkx import Graph
+import networkx as nx
 
 from Utility import Utility
 from pyspark.sql import functions as f, Window
@@ -33,11 +32,12 @@ class Account(Utility):
         self.logger.info("Grouping the data according to connected components.")
         self.df = self.df.filter(f.col("TOTAL_Score") > 15)
 
-        graph1 = Graph()
+        graph1 = nx.Graph()
         pandas_df = self.df.toPandas()
         orig = tuple(pandas_df['ORIG'])
         benef = tuple(pandas_df['BENEF'])
         graph1.add_edges_from(list(zip(orig, benef)))
+
         # l2 = list(networkx.connected_components(graph1))
         # dict1 = [dict.fromkeys(a, b) for b, a in enumerate(l2)]
         # x = {k: v for x in dict1 for k, v in x.items()}
@@ -51,15 +51,14 @@ class Account(Utility):
                 if row['ORIG'] in v:
                     return k
 
-        for comp in networkx.connected_components(graph1):
+        for comp in nx.connected_components(graph1):
             l1[count] = list(comp)
             count += 1
         udf1 = f.udf(udf1, LongType())
         # self.df = self.spark.createDataFrame(pandas_df)
         self.df = self.df.withColumn("Group", udf1(f.struct(self.df["ORIG"])))
         self.df = self.df.orderBy("Group", "REF_ID")
-        self.df.show()
-        self.writefile(self.df, "grouped_data")
+        # self.df.show()
 
     def add_alert_key(self):
         """
@@ -72,7 +71,6 @@ class Account(Utility):
         self.df = self.df.withColumn("ALERT_KEY", f.last("ALERT_KEY", True).over(w1))
         self.df = self.df.orderBy("Group", "REF_ID")
         # self.df.show(25)
-        self.writefile(self.df, "alert_key_data")
 
     def add_top_features(self):
         """
@@ -113,13 +111,13 @@ class Account(Utility):
             df1.Feat3[0].alias("Top_feat3"),
             df1.Feat3[1].cast(DoubleType()).alias("Top_feat3_score"))
 
-        def add_labels(i):
+        def add_labels(index):
             """
             UDF for adding ref_id column to top_3 features dataframe
-            :param i: index of current row
+            :param index: index of current row
             :return:
             """
-            return cols_list[i - 1]
+            return cols_list[index - 1]
 
         w = Window().orderBy(f.lit('row_no'))
 
@@ -133,12 +131,18 @@ class Account(Utility):
         self.df = self.df.join(df1, ["REF_ID"])
 
         w = Window.partitionBy("Group").orderBy(f.desc("TOTAL_Score"), "PAYMENT_DATE")
-        self.df = self.df.withColumn("Alert_top_feat1", f.first(self.df["Top_feat1"]).over(w)). \
-            withColumn("Alert_top_feat1_score", f.first(self.df["Top_feat1_score"]).over(w)). \
-            withColumn("Alert_top_feat2", f.first(self.df["Top_feat2"]).over(w)). \
-            withColumn("Alert_top_feat2_score", f.first(self.df["Top_feat2_score"]).over(w)). \
-            withColumn("Alert_top_feat3", f.first(self.df["Top_feat3"]).over(w)). \
-            withColumn("Alert_top_feat3_score", f.first(self.df["Top_feat3_score"]).over(w))
+        alert_cols = ["Top_feat1", "Top_feat1_score", "Top_feat2", "Top_feat2_score", "Top_feat3", "Top_feat3_score"]
+
+        for i in alert_cols:
+            self.df = self.df.withColumn("Alert_"+str(i), f.first(self.df[i]).over(w))
+        # self.df.show()
+
+        # self.df = self.df.withColumn("Alert_top_feat1", f.first(self.df["Top_feat1"]).over(w)). \
+        #     withColumn("Alert_top_feat1_score", f.first(self.df["Top_feat1_score"]).over(w)). \
+        #     withColumn("Alert_top_feat2", f.first(self.df["Top_feat2"]).over(w)). \
+        #     withColumn("Alert_top_feat2_score", f.first(self.df["Top_feat2_score"]).over(w)). \
+        #     withColumn("Alert_top_feat3", f.first(self.df["Top_feat3"]).over(w)). \
+        #     withColumn("Alert_top_feat3_score", f.first(self.df["Top_feat3_score"]).over(w))
 
         drop_cols = ["FEATURE1", "FEATURE1_Score", "FEATURE2", "FEATURE2_Score", "FEATURE3", "FEATURE3_Score",
                      "FEATURE4", "FEATURE4_Score", "FEATURE5", "FEATURE5_Score"]
@@ -149,5 +153,4 @@ class Account(Utility):
                        "Alert_top_feat2_score", "Alert_top_feat3", "Alert_top_feat3_score"]
         self.df = self.df.select(*select_cols)
         self.df = self.df.orderBy("Group", "REF_ID")
-        self.df.show()
-        self.writefile(self.df, "top_features")
+        # self.df.show()

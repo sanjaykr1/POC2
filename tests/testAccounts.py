@@ -14,6 +14,7 @@ class AccountTest(PySparkTest):
 
     @classmethod
     def setUpClass(cls):
+        super().setUpClass()
         cls.filename = "dataset/testAccountdata.csv"
         cls.schema = super().sch
         cls.a1 = Account(cls.filename, cls.schema)
@@ -77,8 +78,9 @@ class AccountTest(PySparkTest):
         test_group_df = self.spark.read.csv(test_group_path, header=True, schema=group_schema)
         cols = self.a1.df.columns[:]
         test_group_df = test_group_df.select(*cols)
-        self.a1.df.printSchema()
-        test_group_df.printSchema()
+
+        # self.a1.df.printSchema()
+        # test_group_df.printSchema()
         self.dataframe_equal(self.a1.df, test_group_df, "REF_ID")
 
     def test_alert_key(self):
@@ -109,6 +111,7 @@ class AccountTest(PySparkTest):
         test_alert_df = self.spark.read.csv(test_alert_data, header=True, schema=alert_schema)
         cols = self.a1.df.columns[:]
         test_alert_df = test_alert_df.select(*cols)
+
         # self.a1.df.printSchema()
         # test_alert_df.printSchema()
         self.dataframe_equal(self.a1.df, test_alert_df, "REF_ID")
@@ -131,12 +134,12 @@ class AccountTest(PySparkTest):
             StructField("PAYMENT_DATE", TimestampType(), True),
             StructField("Group", LongType(), True),
             StructField("ALERT_KEY", StringType(), True),
-            StructField("Alert_top_feat1", StringType(), True),
-            StructField("Alert_top_feat1_score", DoubleType(), True),
-            StructField("Alert_top_feat2", StringType(), True),
-            StructField("Alert_top_feat2_score", DoubleType(), True),
-            StructField("Alert_top_feat3", StringType(), True),
-            StructField("Alert_top_feat3_score", DoubleType(), True),
+            StructField("Alert_Top_feat1", StringType(), True),
+            StructField("Alert_Top_feat1_score", DoubleType(), True),
+            StructField("Alert_Top_feat2", StringType(), True),
+            StructField("Alert_Top_feat2_score", DoubleType(), True),
+            StructField("Alert_Top_feat3", StringType(), True),
+            StructField("Alert_Top_feat3_score", DoubleType(), True),
             StructField("MONTH", StringType(), True)
         ])
         self.logger.info("Reading test_csv file %s", test_top3)
@@ -147,3 +150,4 @@ class AccountTest(PySparkTest):
         # self.a1.df.printSchema()
         # test_top3_df.printSchema()
         self.dataframe_equal(self.a1.df, test_top3_df, "REF_ID")
+
